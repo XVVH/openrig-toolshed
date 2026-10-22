@@ -2,26 +2,25 @@
 
 Ask, 'Done looks like' 4: `rig bundle install ... --preset recommended --plan`
 previews cleanly (no schema errors). OpenRig (`rig` 0.6.14) lives on the-claw;
-this test syncs rigs/ to /tmp there, builds the bundle and runs the read-only
---plan install. Nothing under ~/rigs on the-claw is touched. Skipped when
-`ssh claw-auto` is not reachable so the suite stays green offline.
+each run creates its own scratch dir /tmp/toolshed-check-<uuid4 hex> there
+(src/, proj/ as a fresh git repo, target/), syncs rigs/ into it, builds the
+bundle and runs the read-only --plan install inside it, then removes exactly
+that dir. Concurrent runs never share remote state. Nothing outside that dir
+on the-claw is touched (never ~/rigs). Skipped when `ssh claw-auto` is not
+reachable so the suite stays green offline.
 """
 import os
 import re
+import shlex
 import subprocess
 import unittest
+import uuid
 
 import _support as S
 
 HOST = "claw-auto"
-REMOTE = (
-    "export PATH=/opt/homebrew/opt/node@22/bin:/opt/homebrew/bin:$PATH; "
-    "cd /tmp/toolshed-check/src && "
-    "rig bundle create rigs/toolshed/rig.yaml --preset recommended "
-    "--min-cli-version 0.6.6 --min-daemon-version 0.6.6 -o /tmp/toolshed-check/toolshed.rigbundle && "
-    "cd /tmp/toolshed-check/proj && "
-    "rig bundle install /tmp/toolshed-check/toolshed.rigbundle --target /tmp/toolshed-check/target --cwd . --plan"
-)
+REMOTE_PATH = "export PATH=/opt/homebrew/opt/node@22/bin:/opt/homebrew/bin:$PATH; "
+RUN_DIR_RE = re.compile(r"^/tmp/toolshed-check-[0-9a-f]{32}$")
 SSH = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8"]
 SKILL_ID = "prototype-before-ask"
 CONTEXT_CMD = "rig context add --git https://github.com/mvschwarz/openrig-world"
@@ -42,21 +41,68 @@ def _seats():
             for p in rig["pods"] for m in p.get("members", [])}
 
 
+def _run_dir():
+    """A fresh remote scratch path, unique to this run."""
+    return "/tmp/toolshed-check-" + uuid.uuid4().hex
+
+
+def _prepare_cmd(d):
+    """Create the run dir (fails if it already exists) with src/, proj/ (git repo), target/."""
+    q = shlex.quote
+    return (REMOTE_PATH + "mkdir %s && mkdir %s %s %s && git init -q %s"
+            % (q(d), q(d + "/src"), q(d + "/proj"), q(d + "/target"), q(d + "/proj")))
+
+
+def _plan_cmd(d):
+    """Build the bundle into d and run the --plan install in d/proj against d/target."""
+    q = shlex.quote
+    bundle = d + "/toolshed.rigbundle"
+    return (REMOTE_PATH +
+            "cd %s && " % q(d + "/src") +
+            "rig bundle create rigs/toolshed/rig.yaml --preset recommended "
+            "--min-cli-version 0.6.6 --min-daemon-version 0.6.6 -o %s && " % q(bundle) +
+            "cd %s && " % q(d + "/proj") +
+            "rig bundle install %s --target %s --cwd . --plan" % (q(bundle), q(d + "/target")))
+
+
+def _remove_run_dir(d):
+    """rm -rf exactly this run's dir; refuse anything that is not a per-run path."""
+    if not RUN_DIR_RE.match(d):
+        raise ValueError("refusing to remove %r: not a per-run scratch dir" % d)
+    subprocess.run(SSH + [HOST, "rm -rf -- %s" % shlex.quote(d)], check=True, timeout=120)
+
+
 @unittest.skipUnless(_reachable(), "ssh %s unreachable; install preview not run" % HOST)
 class InstallPlan(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # --delete keeps the remote copy equal to this checkout (only /tmp on the-claw).
-        subprocess.run(
-            ["rsync", "-a", "--delete", "--exclude", ".git",
-             os.path.join(S.REPO_ROOT, "rigs") + "/",
-             "%s:/tmp/toolshed-check/src/rigs/" % HOST],
-            check=True, timeout=180)
-        proc = subprocess.run(SSH + [HOST, REMOTE], stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT, universal_newlines=True, timeout=600)
+        # Chosen before anything runs remotely so cleanup always knows the exact path.
+        cls.remote_dir = _run_dir()
+        try:
+            subprocess.run(SSH + [HOST, _prepare_cmd(cls.remote_dir)], check=True, timeout=120)
+            subprocess.run(
+                ["rsync", "-a", "--delete", "--exclude", ".git",
+                 os.path.join(S.REPO_ROOT, "rigs") + "/",
+                 "%s:%s/src/rigs/" % (HOST, cls.remote_dir)],
+                check=True, timeout=180)
+            proc = subprocess.run(SSH + [HOST, _plan_cmd(cls.remote_dir)],
+                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                  universal_newlines=True, timeout=600)
+        except BaseException:
+            # unittest skips tearDownClass when setUpClass raises; clean up here instead,
+            # without letting a cleanup error mask the original one.
+            try:
+                cls.tearDownClass()
+            except Exception:
+                pass
+            raise
         cls.rc = proc.returncode
         cls.out = proc.stdout
         cls.lines = cls.out.splitlines()
+
+    @classmethod
+    def tearDownClass(cls):
+        _remove_run_dir(cls.remote_dir)
 
     def _writes(self):
         try:
