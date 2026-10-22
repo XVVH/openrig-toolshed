@@ -306,7 +306,7 @@ OpenRig v0.3.0 adds `rig agent-image`, `rig context-pack`, `rig workspace`, and
 work. Treat `demo` as legacy/test content unless a task specifically asks for
 the old demo spec. *(0.6.6: the built-in teams are `starter` and `factory`, plus the
 specialist teams `code-review`, `research` and `pm`. `product-team`, `conveyor` and
-`demo` are gone, and `first-project` is starter's old name. `toolshed` is a rig
+`demo` are gone, and `first-project` is starter's old name. `workshop` is a rig
 bundle.)*
 
 OpenRig v0.3.1 adds public package/source surfaces for Plugin Primitive v0,
