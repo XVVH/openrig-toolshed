@@ -25,6 +25,19 @@ configuration IDs identify the packaged runtime choice, not another install.
 `agents/toolshed/guidance/`. In a clone of OpenRig, the seats also load that
 repository's own `developing-openrig` skill.
 
+## What's different from `workshop`
+
+`toolshed` is `openrig-world`'s `workshop` (pinned at `47388ef`) with one
+addition: the lead and the builder classify a "which approach" fork before they
+ask about it. A fork whose answer is a fact you could observe by running
+something is settled in that seat with the `prototype-before-ask` skill
+(`agents/toolshed/bundle-skills/prototype-before-ask/`): a throwaway script in
+`.scratch/` at the root of the clone, variants run side by side, the decision
+and its evidence written into the brief or the builder's report. A product or
+preference call, or anything visual, still goes to the person. The round itself
+never crosses seats; only the outcome does, inside the queue item that was going
+to be written anyway. Seats, permissions and edges are `workshop`'s, unchanged.
+
 ## Before you start
 
 - OpenRig 0.6.6 or later (`rig --version`), Node 22 or 24, and tmux.
@@ -84,8 +97,8 @@ your logged-in providers, and installs this bundle to `~/rigs/toolshed`. For
 example, from your project's clone with both Claude Code and Codex available:
 
 ```sh
-rig bundle install https://github.com/mvschwarz/openrig-world/tree/main/rigs/toolshed --preset recommended --target ~/rigs/toolshed --cwd . --plan
-rig bundle install https://github.com/mvschwarz/openrig-world/tree/main/rigs/toolshed --preset recommended --target ~/rigs/toolshed --cwd .
+rig bundle install https://github.com/XVVH/openrig-toolshed/tree/main/rigs/toolshed --preset recommended --target ~/rigs/toolshed --cwd . --plan
+rig bundle install https://github.com/XVVH/openrig-toolshed/tree/main/rigs/toolshed --preset recommended --target ~/rigs/toolshed --cwd .
 ```
 
 The first command previews the install; the second installs and launches it.
@@ -94,7 +107,7 @@ the **same** `--target ~/rigs/toolshed`, never a per-option folder or rig name.
 For a reviewed version, use the registry's exact commit link instead of `main`.
 
 When working from a clone of this repository, preview the authored spec with
-`rig up <path-to>/openrig-world/rigs/toolshed/rig.yaml --cwd . --plan`.
+`rig up <path-to>/openrig-toolshed/rigs/toolshed/rig.yaml --cwd . --plan`.
 `--cwd .` selects your project: without it, member working directories resolve
 against the spec's folder. Each seat checks this at start.
 

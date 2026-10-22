@@ -43,6 +43,9 @@ resources:
     # at 0e3fd0cfeeea6ed0081e5ee0e169d8521dd3750e, with its LICENSE beside it.
     - { id: ponytail, path: bundle-skills/ponytail }
     - { id: using-the-tui-together, path: bundle-skills/using-the-tui-together }
+    # prototype-before-ask is this rig's own: the lead and builder profiles select it (the seats that hold a
+    # "which approach" fork); the code reviewer and QA profiles don't.
+    - { id: prototype-before-ask, path: bundle-skills/prototype-before-ask }
   plugins:
     # OpenRig's own plugin, as the daemon seeded it into its OpenRig home (OpenRig 0.6.5 or later).
     - id: openrig-core
@@ -62,8 +65,9 @@ profiles:
     preferences:
       runtime: codex
     uses:
-      # The Claude Code and Codex roles share this list (see the note at the top).
-      skills: &seat-skills [ponytail, using-the-tui-together]
+      # The lead and builder share this list; the code reviewer and QA seat share the one below
+      # (same, without prototype-before-ask). See the note at the top.
+      skills: &deciding-seat-skills [ponytail, using-the-tui-together, prototype-before-ask]
       plugins: &seat-plugins [openrig-core]
       runtime_resources: [claude-activity-hooks]
     startup:
@@ -78,7 +82,7 @@ profiles:
     preferences:
       runtime: claude-code
     uses:
-      skills: *seat-skills
+      skills: *deciding-seat-skills
       plugins: *seat-plugins
       runtime_resources: [claude-activity-hooks]
     startup:
@@ -93,7 +97,7 @@ profiles:
     preferences:
       runtime: codex
     uses:
-      skills: *seat-skills
+      skills: &seat-skills [ponytail, using-the-tui-together]
       plugins: *seat-plugins
       runtime_resources: [claude-activity-hooks]
     startup:

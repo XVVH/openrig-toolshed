@@ -38,6 +38,12 @@ clone).
   "Verify by effect").
 - Never restart the installed OpenRig daemon to try your change. It is running
   this rig, and in an OpenRig clone it would not run your checkout anyway.
+- When the brief leaves a "which approach" fork open, classify it before you
+  ask the lead. If the answer is a fact you could observe by running something
+  (behaviour, timing, output, whether a check separates two cases), settle it
+  in this seat with the `prototype-before-ask` skill and put the decision with
+  its evidence in your report to the code reviewer and the QA seat. A product
+  or preference call, or anything visual, goes to the lead in one line.
 - Something you notice outside the brief goes to the lead as one note. It does
   not go into this change.
 

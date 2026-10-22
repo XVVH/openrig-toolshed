@@ -31,5 +31,9 @@ Drop `--plan` to install and launch.
 
 ## Status
 
-Scaffolded from `workshop` (2026-10-21). `prototype-before-ask` and the two guidance edits are
-not yet written — see [`rigs/toolshed/agents/toolshed/`](rigs/toolshed/agents/toolshed/).
+Scaffolded from `workshop` (2026-10-21). `prototype-before-ask` lives at
+[`rigs/toolshed/agents/toolshed/bundle-skills/prototype-before-ask/`](rigs/toolshed/agents/toolshed/bundle-skills/prototype-before-ask/)
+and is selected by the `lead` and `builder` profiles in `agent.yaml`; the
+classify-before-ask line is in `guidance/lead.md` ("Scope the work") and
+`guidance/builder.md` ("Make the change"). Pi profiles (`all-pi`) do not select
+it yet.

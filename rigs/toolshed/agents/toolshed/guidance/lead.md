@@ -138,6 +138,12 @@ Look before you build (the rig's culture):
   an OpenRig clone), and open questions.
 - If it will not review in one sitting, propose a split to the person (one
   concern per pull request).
+- Before you ask about a "which approach" fork, classify it. If the answer is
+  a fact you could observe by running something (behaviour, timing, output,
+  whether a check separates two cases), it is not the person's to answer:
+  settle it in this seat with the `prototype-before-ask` skill and put the
+  decision with its evidence in the brief. A product or preference call, or
+  anything visual, still goes to the person.
 - If two readings lead to different work, ask the person in one line.
   Otherwise go.
 
