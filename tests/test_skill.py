@@ -2,7 +2,7 @@
 
 Ask, 'What it is' 1 and 3, and Constraints: behavioural/timing half of pstack's
 Prototype playbook only; no decision -> no prototype; scratch dir kept out of
-commits via .git/info/exclude, never the seat's worktree; alternatives run
+commits via .git/info/exclude, in the seat's own checkout; alternatives run
 labelled side by side; observe, don't assert; report = variants, evidence,
 recommendation, scratch path, throwaway; the round never crosses seats -- only
 the outcome, tagged kind:prototype-decision; no visual decisions, no
@@ -54,15 +54,33 @@ class Body(unittest.TestCase):
     def test_no_decision_no_prototype(self):
         self.assertRegex(self.t, r"\bno (real |actual )?decision\b[^.]{0,80}\bno prototype\b")
 
-    def test_scratch_dir_at_clone_root_excluded_via_git_info_exclude(self):
-        self.assertIn(".git/info/exclude", self.t)
-        self.assertRegex(self.t, r"\bscratch\b")
-        self.assertRegex(self.t, r"\b(root of (the|your) clone|clone root|clone's root)\b")
+    def test_scratch_dir_in_the_seats_checkout_never_the_source_tree(self):
+        # Skill 1.1: the scratch dir sits in the checkout the seat works in -- the clone
+        # for the lead, the builder's own worktree for the builder.
+        where = re.search(r"\bscratch\b.{0,120}?\b(root of|in|inside|under) (the |your |whichever |each )?"
+                          r"(own )?(checkout|working copy) (that )?(you|the seat|this seat|each seat|it)"
+                          r"( (are|is))? (work(s|ing)?|stand(s|ing)?)\b", self.t)
+        self.assertTrue(where, "the scratch dir must be in the checkout the seat works in")
+        after = self.t[where.end():where.end() + 250] if where else ""
+        self.assertRegex(after, r"\bclone\b[^.;]{0,40}\blead\b|\blead\b[^.;]{0,40}\bclone\b",
+                         "for the lead, that checkout is the clone")
+        self.assertRegex(after, r"\bworktree\b[^.;]{0,40}\bbuilder\b|\bbuilder\b[^.;]{0,40}\bworktree\b",
+                         "for the builder, that checkout is its own worktree")
+        self.assertRegex(self.t, r"\bscratch\b.{0,400}\b(never|not)\b[^.]{0,20}\b(in|inside|under|part of) "
+                                 r"(the |your )?((repository|repo|project)'s )?source tree\b",
+                         "the scratch dir is never in the repository's source tree")
+        # The pre-1.1 rule is gone.
+        self.assertNotRegex(self.t, r"\bscratch\b.{0,240}\b(never|not)\b[^.]{0,30}\b(your|the seat's|its|this seat's) (own )?worktree\b",
+                            "must no longer say the scratch dir is never the seat's own worktree")
 
-    def test_scratch_is_never_the_seats_worktree(self):
-        # "scratch ... never in your worktree" may span two sentences.
-        self.assertRegex(self.t, r"\bscratch\b.{0,240}\b(never|not)\b[^.]{0,30}\b(your|the seat's|its|this seat's) (own )?worktree\b",
-                         "must say the scratch dir is never the seat's own worktree")
+    def test_scratch_dir_excluded_via_clone_git_info_exclude_covering_worktrees(self):
+        self.assertIn("/.scratch/", self.t)
+        self.assertRegex(self.t, r"\b(clone's|shared) \.git/info/exclude\b|\.git/info/exclude (of|in) the clone\b",
+                         "the exclude line goes in the clone's .git/info/exclude")
+        self.assertRegex(self.t, r"\.git/info/exclude\b.{0,120}?\b(covers?|applies to|appl(y|ies) (to|in)|shared (by|with|across))\b"
+                                 r"[^.]{0,30}\b(every|all|each|the) (\w+ )?worktrees?\b",
+                         "that one exclusion covers every worktree")
+        self.assertRegex(self.t, r"\b(out of|never in|not in|kept from) (the )?commits?\b|\bnever committed\b")
 
     def test_alternatives_run_labelled_side_by_side(self):
         self.assertTrue(self._any_sentence(r"\blabel(l)?ed\b|\blabels?\b", r"side[- ]by[- ]side"))
