@@ -32,7 +32,7 @@ addition: the lead and the builder classify a "which approach" fork before they
 ask about it. A fork whose answer is a fact you could observe by running
 something is settled in that seat with the `prototype-before-ask` skill
 (`agents/toolshed/bundle-skills/prototype-before-ask/`): a throwaway script in
-`.scratch/` at the root of the clone, variants run side by side, the decision
+`.scratch/` in the seat's own checkout, kept out of commits, variants run side by side, the decision
 and its evidence written into the brief or the builder's report. A product or
 preference call, or anything visual, still goes to the person. The round itself
 never crosses seats; only the outcome does, inside the queue item that was going

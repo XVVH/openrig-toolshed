@@ -29,16 +29,12 @@ Speed over polish: no planning, no abstractions, no tests, and code quality does
 
 1. **Name the decision** in one sentence, with the variants. No decision means no prototype: carry on with your
    role.
-2. **Build the smallest script that exercises the question**, in a scratch folder at the root of the clone,
-   `.scratch/<decision-slug>/`. Never in your worktree and never in the repository's source tree. For the builder
-   this is the one exception to "every edit happens in your worktree": scratch files are never committed, so they
-   don't belong on the branch. The first time, add one line, `/.scratch/`, to `.git/info/exclude`, the same way the
-   rig keeps OpenRig's own files out of commits.
-   The script exercises the checkout the decision is about: the clone root for the lead, and for the builder its own
-   worktree (that branch, with the dependencies installed there), never the clone root, which may sit at another
-   revision. Run it from that checkout, or put that path first on the import path, and name the checkout and its
-   revision in the report. Reuse what is installed there; import from the source if that is the cheapest way to
-   exercise the question.
+2. **Build the smallest script that exercises the question**, in `.scratch/<decision-slug>/` at the root of the
+   checkout you work in: the clone for the lead, your own worktree for the builder. The script then runs against
+   the revision the decision is about, with the dependencies installed there; put that path first on the import
+   path if you import from the source. Never in the repository's source tree. The first time, add one line,
+   `/.scratch/`, to the clone's `.git/info/exclude`; that one file covers every worktree, the same way the rig keeps
+   OpenRig's own files out of commits.
 3. **Run the variants side by side, labelled.** Two or three competing versions, each with a name, run under the
    same input in the same session. For a timing decision, run each variant more than once and keep the spread, not
    one number; say which machine and runtime it ran on.
