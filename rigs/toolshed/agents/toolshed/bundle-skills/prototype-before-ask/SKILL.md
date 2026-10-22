@@ -30,10 +30,15 @@ Speed over polish: no planning, no abstractions, no tests, and code quality does
 1. **Name the decision** in one sentence, with the variants. No decision means no prototype: carry on with your
    role.
 2. **Build the smallest script that exercises the question**, in a scratch folder at the root of the clone,
-   `.scratch/<decision-slug>/`. Never in your worktree and never in the repository's source tree. The first time,
-   add one line, `/.scratch/`, to `.git/info/exclude`, the same way the rig keeps OpenRig's own files out of commits.
-   Reuse the repository's installed dependencies; import from its source if that is the cheapest way to exercise the
-   question.
+   `.scratch/<decision-slug>/`. Never in your worktree and never in the repository's source tree. For the builder
+   this is the one exception to "every edit happens in your worktree": scratch files are never committed, so they
+   don't belong on the branch. The first time, add one line, `/.scratch/`, to `.git/info/exclude`, the same way the
+   rig keeps OpenRig's own files out of commits.
+   The script exercises the checkout the decision is about: the clone root for the lead, and for the builder its own
+   worktree (that branch, with the dependencies installed there), never the clone root, which may sit at another
+   revision. Run it from that checkout, or put that path first on the import path, and name the checkout and its
+   revision in the report. Reuse what is installed there; import from the source if that is the cheapest way to
+   exercise the question.
 3. **Run the variants side by side, labelled.** Two or three competing versions, each with a name, run under the
    same input in the same session. For a timing decision, run each variant more than once and keep the spread, not
    one number; say which machine and runtime it ran on.
@@ -54,8 +59,9 @@ never goes to another seat as a queue item.
 - **Lead, during scoping:** the decision and its evidence go into the brief you are already writing, under what
   already exists or open questions (now closed), so the builder inherits a settled call and the path to re-run it.
 - **Builder, mid-implementation:** the decision and its evidence go into your report to the code reviewer and the
-  QA seat, with the commit it shaped and the scratch path, so they can re-run the sketch. Put it in the note to the
-  lead too if it changes what a user gets.
+  QA seat, with the commit it shaped and the scratch path, so they can re-run the sketch. If what you observed
+  would change what a user gets, the fork has become a product call: ask the lead in one line before you act on
+  it. A note afterwards is not permission.
 
 Only the outcome crosses seats, inside the queue item you were going to write anyway. If a row carries one, tag it
 `--tags kind:prototype-decision` alongside its scope tags, so it can be found later; nothing reads the tag today.
@@ -63,5 +69,6 @@ Only the outcome crosses seats, inside the queue item you were going to write an
 ## Report
 
 In the brief or the report, in this order: the decision in one line; the variants, each with what it showed;
-the recommendation and why; the scratch path; "throwaway, not shippable." Keep the evidence to what you saw at the
-source, the rig's culture: a claim names the command and what you saw.
+the recommendation and why; the checkout and revision the script ran against, with the command; the scratch path;
+"throwaway, not shippable." Keep the evidence to what you saw at the source, the rig's culture: a claim names the
+command and what you saw.
